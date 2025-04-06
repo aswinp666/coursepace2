@@ -7,6 +7,8 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const User = require("./src/components/models/User");
 const Enrollment = require("./src/components/models/Enrollment"); 
+const Course = require('./src/components/models/Coursecrud');
+
 
 const app = express();
 
@@ -157,6 +159,51 @@ app.get("/enrollments", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch enrollments" });
   }
 });
+
+
+
+// Create Course
+app.post('/courses', authMiddleware, async (req, res) => {
+  try {
+    const course = new Course(req.body);
+    await course.save();
+    res.status(201).json(course);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create course' });
+  }
+});
+
+// Get All Courses
+app.get('/courses', async (req, res) => {
+  try {
+    const courses = await Course.find();
+    res.json(courses);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch courses' });
+  }
+});
+
+// Update Course
+app.put('/courses/:id', authMiddleware, async (req, res) => {
+  try {
+    const updated = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update course' });
+  }
+});
+
+// Delete Course
+app.delete('/courses/:id', authMiddleware, async (req, res) => {
+  try {
+    await Course.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Course deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete course' });
+  }
+});
+
+
 
 
 //  Start Server
