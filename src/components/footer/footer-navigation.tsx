@@ -31,7 +31,7 @@ const companyMenu: Array<Navigation> = [
   { label: 'Contact Us', path: '#' },
   { label: 'Admin Dashboard', path: '/dashboard' },
   { label: 'Term & Condition', path: '#' },
-  { label: 'FAQ', path: '#' },
+  { label: 'Take a Quiz', path: '/quizzes' },
 ]
 
 interface NavigationItemProps {

@@ -106,7 +106,7 @@ const MainDashboard = () => {
           </Link>
 
           {/* Enrolled Students Management Card */}
-          <Link href="/" passHref>
+          <Link href="/studentlist" passHref>
             <div style={cardStyle}>
               <div style={iconStyle}>👨‍🎓</div>
               <h3 style={cardTitleStyle}>Enrolled Student Details</h3>
@@ -115,7 +115,7 @@ const MainDashboard = () => {
           </Link>
 
           {/* Quizzes Card */}
-          <Link href="/" passHref>
+          <Link href="/quizpanel" passHref>
             <div style={cardStyle}>
               <div style={iconStyle}> </div>
               <h3 style={cardTitleStyle}>Quizzes Attended</h3>
