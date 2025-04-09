@@ -25,6 +25,7 @@ app.use(
   })
 )
 app.use(cookieParser())
+app.use(express.json())
 
 //  Sign Up Route (Register)
 app.post('/signup', async (req, res) => {
