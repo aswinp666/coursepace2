@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser')
 const User = require('./src/components/models/User')
 const Enrollment = require('./src/components/models/Enrollment')
 const Course = require('./src/components/models/Coursecrud')
+const Score = require('./src/components/models/Score')
 
 const app = express()
 
