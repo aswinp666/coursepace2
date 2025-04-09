@@ -79,7 +79,7 @@ app.post('/signin', async (req, res) => {
     // Send token in HTTP-Only Cookie
     res.cookie('token', token, {
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: 'Lax',
     })
 
