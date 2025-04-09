@@ -1,79 +1,89 @@
-import { useState } from "react";
-import { useRouter } from "next/router";
+import { useState } from 'react'
+import { useRouter } from 'next/router'
 
 const SignUp = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   const handleSignUp = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+    e.preventDefault()
+    setError('')
+    setLoading(true)
 
     try {
-      const response = await fetch("http://localhost:5000/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
-      });
+      })
 
-      const data = await response.json();
-      setLoading(false);
-      
-      if (!response.ok) throw new Error(data.error || "Registration failed");
-      
-      router.push("/signin");
+      const data = await response.json()
+      setLoading(false)
+
+      if (!response.ok) throw new Error(data.error || 'Registration failed')
+
+      router.push('/signin')
     } catch (error) {
-      setLoading(false);
-      setError(error.message);
-      console.error("Sign Up Error:", error);
+      setLoading(false)
+      setError(error.message)
+      console.error('Sign Up Error:', error)
     }
-  };
+  }
 
   return (
-    <div style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      minHeight: "100vh",
-      background: "linear-gradient(135deg, rgba(18, 124, 113, 0.2) 0%, rgba(18, 124, 113, 0.1) 100%)",
-      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
-    }}>
-      <div style={{
-        backdropFilter: "blur(16px)",
-        backgroundColor: "rgba(255, 255, 255, 0.25)",
-        borderRadius: "24px",
-        padding: "40px",
-        width: "100%",
-        maxWidth: "400px",
-        boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.15)",
-        border: "1px solid rgba(255, 255, 255, 0.18)",
-      }}>
-        <h2 style={{
-          color: "#127C71",
-          marginBottom: "30px",
-          fontSize: "28px",
-          fontWeight: "600",
-          textAlign: "center"
-        }}>Create Account</h2>
-        
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, rgba(18, 124, 113, 0.2) 0%, rgba(18, 124, 113, 0.1) 100%)',
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      }}
+    >
+      <div
+        style={{
+          backdropFilter: 'blur(16px)',
+          backgroundColor: 'rgba(255, 255, 255, 0.25)',
+          borderRadius: '24px',
+          padding: '40px',
+          width: '100%',
+          maxWidth: '400px',
+          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+          border: '1px solid rgba(255, 255, 255, 0.18)',
+        }}
+      >
+        <h2
+          style={{
+            color: '#127C71',
+            marginBottom: '30px',
+            fontSize: '28px',
+            fontWeight: '600',
+            textAlign: 'center',
+          }}
+        >
+          Create Account
+        </h2>
+
         {error && (
-          <div style={{
-            backgroundColor: "rgba(255, 99, 71, 0.2)",
-            color: "#ff6347",
-            padding: "12px",
-            borderRadius: "8px",
-            marginBottom: "20px",
-            border: "1px solid rgba(255, 99, 71, 0.3)"
-          }}>
+          <div
+            style={{
+              backgroundColor: 'rgba(255, 99, 71, 0.2)',
+              color: '#ff6347',
+              padding: '12px',
+              borderRadius: '8px',
+              marginBottom: '20px',
+              border: '1px solid rgba(255, 99, 71, 0.3)',
+            }}
+          >
             {error}
           </div>
         )}
-        
-        <form onSubmit={handleSignUp} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+
+        <form onSubmit={handleSignUp} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
             <input
               type="email"
@@ -82,19 +92,19 @@ const SignUp = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               style={{
-                width: "100%",
-                padding: "14px 16px",
-                borderRadius: "12px",
-                border: "1px solid rgba(18, 124, 113, 0.3)",
-                backgroundColor: "rgba(255, 255, 255, 0.3)",
-                fontSize: "15px",
-                outline: "none",
-                transition: "all 0.3s ease",
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+                width: '100%',
+                padding: '14px 16px',
+                borderRadius: '12px',
+                border: '1px solid rgba(18, 124, 113, 0.3)',
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                fontSize: '15px',
+                outline: 'none',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
               }}
             />
           </div>
-          
+
           <div>
             <input
               type="password"
@@ -103,84 +113,98 @@ const SignUp = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               style={{
-                width: "100%",
-                padding: "14px 16px",
-                borderRadius: "12px",
-                border: "1px solid rgba(18, 124, 113, 0.3)",
-                backgroundColor: "rgba(255, 255, 255, 0.3)",
-                fontSize: "15px",
-                outline: "none",
-                transition: "all 0.3s ease",
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+                width: '100%',
+                padding: '14px 16px',
+                borderRadius: '12px',
+                border: '1px solid rgba(18, 124, 113, 0.3)',
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                fontSize: '15px',
+                outline: 'none',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
               }}
             />
           </div>
-          
+
           <button
             type="submit"
             disabled={loading}
             style={{
-              backgroundColor: "#127C71",
-              color: "white",
-              padding: "14px",
-              borderRadius: "12px",
-              border: "none",
-              fontSize: "16px",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              boxShadow: "0 4px 12px rgba(18, 124, 113, 0.3)",
-              opacity: loading ? "0.7" : "1",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "8px"
+              backgroundColor: '#127C71',
+              color: 'white',
+              padding: '14px',
+              borderRadius: '12px',
+              border: 'none',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 12px rgba(18, 124, 113, 0.3)',
+              opacity: loading ? '0.7' : '1',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '8px',
             }}
           >
             {loading ? (
               <>
-                <span className="spinner" style={{
-                  width: "18px",
-                  height: "18px",
-                  border: "3px solid rgba(255, 255, 255, 0.3)",
-                  borderTopColor: "white",
-                  borderRadius: "50%",
-                  animation: "spin 1s linear infinite"
-                }} />
+                <span
+                  className="spinner"
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    border: '3px solid rgba(255, 255, 255, 0.3)',
+                    borderTopColor: 'white',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                  }}
+                />
                 Creating Account...
               </>
-            ) : "Sign Up"}
+            ) : (
+              'Sign Up'
+            )}
           </button>
         </form>
-        
-        <div style={{
-          marginTop: "20px",
-          textAlign: "center",
-          color: "rgba(0, 0, 0, 0.6)",
-          fontSize: "14px"
-        }}>
-          Already have an account? <a href="/signin" style={{ color: "#127C71", fontWeight: "500" }}>Sign in</a>
+
+        <div
+          style={{
+            marginTop: '20px',
+            textAlign: 'center',
+            color: 'rgba(0, 0, 0, 0.6)',
+            fontSize: '14px',
+          }}
+        >
+          Already have an account?{' '}
+          <a href="/signin" style={{ color: '#127C71', fontWeight: '500' }}>
+            Sign in
+          </a>
         </div>
       </div>
-      
+
       <style jsx global>{`
         @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
-        
+
         input:focus {
-          border-color: #127C71 !important;
+          border-color: #127c71 !important;
           box-shadow: 0 0 0 2px rgba(18, 124, 113, 0.2) !important;
         }
-        
+
         button:hover:not(:disabled) {
           transform: translateY(-2px);
           box-shadow: 0 6px 16px rgba(18, 124, 113, 0.4) !important;
         }
       `}</style>
     </div>
-  );
-};
+  )
+}
 
-export default SignUp;
+export default SignUp
