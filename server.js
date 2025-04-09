@@ -20,7 +20,8 @@ app.use(
   cors({
     credentials: true,
     origin: [
-      'http://localhost:3000', // for local development
+      'http://localhost:3000',
+      'http://localhost:8080', // for local development
       'https://coursespace-production.up.railway.app', // for production
     ], // for production
   })
