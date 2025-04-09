@@ -15,11 +15,13 @@ const app = express()
 connectDB()
 
 // Middleware
-app.use(express.json())
 app.use(
   cors({
     credentials: true,
-    origin: 'http://localhost:3000',
+    origin: [
+      'http://localhost:3000', // for local development
+      'https://coursespace-production.up.railway.app', // for production
+    ], // for production
   })
 )
 app.use(cookieParser())
@@ -194,7 +196,9 @@ app.delete('/courses/:id', authMiddleware, async (req, res) => {
 })
 
 //  Start Server
+
 const PORT = process.env.PORT || 5000
+
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`)
+  console.log(`Server running on port ${PORT}`)
 })
