@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev:frontend": "next dev",
+    "dev:frontend": "next dev -p 8080",
     "dev:backend": "node server.js",
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "build": "next build --no-lint",
-    "start:frontend": "next start",
+    "start:frontend": "next start -p 8080",
     "start:backend": "node server.js",
     "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
     "lint": "next lint"
