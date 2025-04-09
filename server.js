@@ -196,9 +196,35 @@ app.delete('/courses/:id', authMiddleware, async (req, res) => {
   }
 })
 
+app.post('/api/scores', async (req, res) => {
+  const { quizuserName, score, totalQuestions, percentage, categories } = req.body
+
+  if (!quizuserName || typeof score !== 'number') {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid data: quizuserName and score are required',
+    })
+  }
+
+  try {
+    const newScore = await Score.create({
+      quizuserName,
+      score,
+      totalQuestions,
+      percentage,
+      categories,
+    })
+
+    return res.status(201).json({ success: true, data: newScore })
+  } catch (error) {
+    console.error('Error saving score:', error)
+    return res.status(500).json({ success: false, error: error.message })
+  }
+})
+
 //  Start Server
 
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT || 8080
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
