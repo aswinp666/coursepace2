@@ -18,145 +18,116 @@ connectDB()
 // Middleware
 app.use(
   cors({
+    origin: ['http://localhost:3000', 'https://coursespace-production.up.railway.app'],
     credentials: true,
-    origin: [
-      'http://localhost:3000', // for local development
-      'https://coursespace-production.up.railway.app', // for production
-    ], // for production
   })
 )
 app.use(cookieParser())
 app.use(express.json())
 
-//  Sign Up Route (Register)
-app.post('/signup', async (req, res) => {
-  try {
-    const { email, password } = req.body
-
-    // Check if user already exists
-    let user = await User.findOne({ email })
-    if (user) {
-      return res.status(400).json({ error: 'User already exists' })
-    }
-
-    // Hash password
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
-
-    // Create new user
-    user = new User({ email, password: hashedPassword })
-    await user.save()
-
-    res.json({ message: 'User registered successfully' })
-  } catch (error) {
-    console.error('Signup error:', error)
-    res.status(500).json({ error: 'Internal server error' })
-  }
-})
-
-//  Sign In Route (Login)
-app.post('/signin', async (req, res) => {
-  try {
-    const { email, password } = req.body
-
-    // Check if user exists
-    const user = await User.findOne({ email })
-    if (!user) {
-      return res.status(400).json({ error: 'User not found' })
-    }
-
-    // Compare passwords
-    const isMatch = await bcrypt.compare(password, user.password)
-    if (!isMatch) {
-      return res.status(400).json({ error: 'Invalid credentials' })
-    }
-
-    // Generate JWT token
-    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
-      expiresIn: '7d', // Token expires in 7 days
-    })
-
-    // Send token in HTTP-Only Cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'Lax',
-    })
-
-    res.json({ message: 'Login successful', user: { email: user.email } })
-  } catch (error) {
-    console.error('Signin error:', error)
-    res.status(500).json({ error: 'Internal server error' })
-  }
-})
-
-//  Logout Route (Clear Cookie)
-app.post('/logout', (req, res) => {
-  res.clearCookie('token')
-  res.json({ message: 'Logged out successfully' })
-})
-
-//  Middleware to Protect Routes
+// Auth Middleware
 const authMiddleware = (req, res, next) => {
   const token = req.cookies.token
-  if (!token) return res.status(401).json({ error: 'Unauthorized' })
+  if (!token) return res.status(401).json({ error: 'Unauthorized: No Token' })
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
     req.user = decoded
     next()
   } catch (error) {
-    res.status(401).json({ error: 'Invalid token' })
+    console.error('Token error:', error)
+    return res.status(401).json({ error: 'Invalid or Expired Token' })
   }
 }
 
-//  Get Logged-in User
+// Routes
+
+// Signup
+app.post('/signup', async (req, res) => {
+  try {
+    const { email, password } = req.body
+    const existingUser = await User.findOne({ email })
+    if (existingUser) return res.status(400).json({ error: 'User already exists' })
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+    const newUser = new User({ email, password: hashedPassword })
+    await newUser.save()
+
+    res.json({ message: 'User registered successfully' })
+  } catch (error) {
+    console.error('Signup error:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+})
+
+// Signin
+app.post('/signin', async (req, res) => {
+  try {
+    const { email, password } = req.body
+    const user = await User.findOne({ email })
+    if (!user) return res.status(400).json({ error: 'User not found' })
+
+    const isMatch = await bcrypt.compare(password, user.password)
+    if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' })
+
+    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    })
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // true in prod
+      sameSite: 'Lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    })
+
+    res.json({ message: 'Login successful', user: { email: user.email } })
+  } catch (error) {
+    console.error('Signin error:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+})
+
+// Logout
+app.post('/logout', (req, res) => {
+  res.clearCookie('token')
+  res.json({ message: 'Logged out successfully' })
+})
+
+// Get Logged In User
 app.get('/user', authMiddleware, async (req, res) => {
   const user = await User.findById(req.user.id).select('-password')
   res.json({ user })
 })
 
-//  Enrollment Route (For Enrolling Users)
+// Enroll
 app.post('/enroll', authMiddleware, async (req, res) => {
   const { name, dob, age, course } = req.body
-
-  // Check if all fields are provided
   if (!name || !dob || !age || !course) {
-    return res.status(400).json({ error: 'All fields are required' })
+    return res.status(400).json({ error: 'All fields required' })
   }
 
   try {
-    // new enrollment entry in MongoDB
-    const newEnrollment = new Enrollment({
-      name,
-      dob,
-      age,
-      course,
-      userId: req.user.id,
-    })
-
-    // Save the enrollment
+    const newEnrollment = new Enrollment({ name, dob, age, course, userId: req.user.id })
     await newEnrollment.save()
-
     res.json({ message: 'Enrollment successful' })
   } catch (error) {
     console.error('Enrollment error:', error)
-    res.status(500).json({ error: 'Failed to enroll, please try again' })
+    res.status(500).json({ error: 'Failed to enroll' })
   }
 })
 
-// Get All Enrolled Students
+// Get All Enrollments
 app.get('/enrollments', async (req, res) => {
   try {
     const enrollments = await Enrollment.find()
     res.json(enrollments)
   } catch (error) {
-    console.error('Fetch enrollments error:', error)
     res.status(500).json({ error: 'Failed to fetch enrollments' })
   }
 })
 
-// Create Course
+// CRUD for Courses
 app.post('/courses', authMiddleware, async (req, res) => {
   try {
     const course = new Course(req.body)
@@ -167,7 +138,6 @@ app.post('/courses', authMiddleware, async (req, res) => {
   }
 })
 
-// Get All Courses
 app.get('/courses', async (req, res) => {
   try {
     const courses = await Course.find()
@@ -177,7 +147,6 @@ app.get('/courses', async (req, res) => {
   }
 })
 
-// Update Course
 app.put('/courses/:id', authMiddleware, async (req, res) => {
   try {
     const updated = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true })
@@ -187,7 +156,6 @@ app.put('/courses/:id', authMiddleware, async (req, res) => {
   }
 })
 
-// Delete Course
 app.delete('/courses/:id', authMiddleware, async (req, res) => {
   try {
     await Course.findByIdAndDelete(req.params.id)
@@ -197,36 +165,21 @@ app.delete('/courses/:id', authMiddleware, async (req, res) => {
   }
 })
 
+// Score Submission
 app.post('/api/scores', async (req, res) => {
   const { quizuserName, score, totalQuestions, percentage, categories } = req.body
-
   if (!quizuserName || typeof score !== 'number') {
-    return res.status(400).json({
-      success: false,
-      error: 'Invalid data: quizuserName and score are required',
-    })
+    return res.status(400).json({ error: 'Invalid data' })
   }
 
   try {
-    const newScore = await Score.create({
-      quizuserName,
-      score,
-      totalQuestions,
-      percentage,
-      categories,
-    })
-
-    return res.status(201).json({ success: true, data: newScore })
+    const newScore = await Score.create({ quizuserName, score, totalQuestions, percentage, categories })
+    res.status(201).json({ success: true, data: newScore })
   } catch (error) {
-    console.error('Error saving score:', error)
-    return res.status(500).json({ success: false, error: error.message })
+    res.status(500).json({ error: 'Failed to save score' })
   }
 })
 
-//  Start Serve
-
+// Server Start
 const PORT = process.env.PORT || 5000
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
