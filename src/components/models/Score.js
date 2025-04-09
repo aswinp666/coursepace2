@@ -1,6 +1,4 @@
-// models/Score.js
-
-import mongoose from 'mongoose'
+const mongoose = require('mongoose')
 
 const scoreSchema = new mongoose.Schema({
   quizuserName: {
@@ -29,4 +27,4 @@ const scoreSchema = new mongoose.Schema({
   },
 })
 
-export default mongoose.models.Score || mongoose.model('Score', scoreSchema)
+module.exports = mongoose.models.Score || mongoose.model('Score', scoreSchema)
