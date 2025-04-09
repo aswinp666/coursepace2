@@ -223,7 +223,7 @@ app.post('/api/scores', async (req, res) => {
   }
 })
 
-//  Start Server
+//  Start Serve
 
 const PORT = process.env.PORT || 5000
 
