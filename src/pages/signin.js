@@ -25,6 +25,7 @@ const SignIn = () => {
       setLoading(false)
 
       if (res.ok) {
+        localStorage.setItem('token', data.token) // <=== Save token here
         router.push('/')
       } else {
         setError(data.error || 'Invalid email or password')
