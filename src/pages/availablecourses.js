@@ -65,7 +65,7 @@ const CoursesPage = () => {
   const handlePayment = async (course) => {
     try {
       const { data } = await axios.post('http://localhost:5000/api/create-order', {
-        amount: course.price,
+        amount: 1,
         courseId: course._id,
       })
 
