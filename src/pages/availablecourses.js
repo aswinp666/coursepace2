@@ -63,60 +63,38 @@ const CoursesPage = () => {
   }
 
   const handlePayment = async (course) => {
-    if (!razorpayLoaded) {
-      alert('Payment system is still loading. Please try again in a moment.')
-      return
-    }
-
     try {
-      // Create order on your server
-      const orderRes = await axios.post('http://localhost:5000/api/create-order', {
-        amount: course.price * 100, // Convert to paise
-        currency: 'INR',
-        receipt: `course_${course._id}`,
-        notes: {
-          courseId: course._id,
-          courseTitle: course.title,
-        },
+      const { data } = await axios.post('/api/payment/checkout', {
+        amount: course.price, // auto send price
+        courseId: course._id, // auto send course id
       })
 
       const options = {
-        key: 'rzp_test_mUSjI5TdDnWLE9', // Your Razorpay test key
-        amount: orderRes.data.amount,
-        currency: orderRes.data.currency,
-        name: 'CourseSpace Academy',
-        description: `Payment for ${course.title}`,
-        order_id: orderRes.data.id,
+        key: 'rzp_test_mUSjI5TdDnWLE9',
+        amount: data.order.amount,
+        currency: 'INR',
+        order_id: data.order.id,
         handler: async function (response) {
-          const verificationSuccess = await verifyPayment(response, course)
+          // payment success → verify payment
+          await axios.post('/api/payment/verify', {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            courseId: course._id, // enroll user for this course
+          })
 
-          if (verificationSuccess) {
-            alert(`Payment Successful! Payment ID: ${response.razorpay_payment_id}`)
-            // You might want to redirect to a success page or update UI
-          } else {
-            alert('Payment verification failed. Please contact support.')
-          }
-        },
-        prefill: {
-          name: 'Student Name',
-          email: 'student@example.com',
-          contact: '+919876543210',
+          alert('Payment Successful & Course Enrolled!')
         },
         theme: {
-          color: '#127c71',
+          color: '#3399cc',
         },
       }
 
-      const rzp1 = new window.Razorpay(options)
-
-      rzp1.on('payment.failed', function (response) {
-        alert(`Payment failed: ${response.error.description}`)
-      })
-
-      rzp1.open()
-    } catch (err) {
-      console.error('Payment error:', err)
-      alert(`Payment failed: ${err.response?.data?.error || 'Unknown error'}`)
+      const razorpay = new window.Razorpay(options)
+      razorpay.open()
+    } catch (error) {
+      console.error(error)
+      alert('Payment Failed')
     }
   }
 
