@@ -29,30 +29,13 @@ const CoursesPage = () => {
     }
   }, [])
 
-  // Fetch course
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const res = await axios.get('http://localhost:5000/courses')
-        setCourses(res.data)
-        setLoading(false)
-      } catch (err) {
-        setError(err.response?.data?.error || 'Failed to fetch courses')
-        setLoading(false)
-      }
-    }
-
-    fetchCourses()
-  }, [])
-
   const verifyPayment = async (paymentResponse, course) => {
     try {
-      const res = await axios.post('http://localhost:5000/verify-payment', {
-        razorpay_payment_id: paymentResponse.razorpay_payment_id,
+      const res = await axios.post('http://localhost:5000/api/verify-payment', {
         razorpay_order_id: paymentResponse.razorpay_order_id,
+        razorpay_payment_id: paymentResponse.razorpay_payment_id,
         razorpay_signature: paymentResponse.razorpay_signature,
         courseId: course._id,
-        amount: course.price * 100, // Convert to paise
       })
 
       return res.data.success
@@ -64,7 +47,7 @@ const CoursesPage = () => {
 
   const handlePayment = async (course) => {
     try {
-      const { data } = await axios.post('/api/payment/orders', {
+      const { data } = await axios.post('http://localhost:5000/api/create-order', {
         amount: course.price,
         courseId: course._id,
       })
@@ -75,14 +58,13 @@ const CoursesPage = () => {
         currency: 'INR',
         order_id: data.order.id,
         handler: async function (response) {
-          await axios.post('/api/payment/verify', {
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
-            courseId: course._id,
-          })
+          const isVerified = await verifyPayment(response, course)
 
-          alert('Payment Successful & Course Enrolled!')
+          if (isVerified) {
+            alert('Payment Successful & Course Enrolled!')
+          } else {
+            alert('Payment Verification Failed!')
+          }
         },
         theme: {
           color: '#3399cc',
