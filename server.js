@@ -9,6 +9,8 @@ const User = require('./src/components/models/User')
 const Enrollment = require('./src/components/models/Enrollment')
 const Course = require('./src/components/models/Coursecrud')
 const Score = require('./src/components/models/Score')
+const Razorpay = require('razorpay')
+const crypto = require('crypto')
 
 const app = express()
 
@@ -19,32 +21,101 @@ connectDB()
 app.use(
   cors({
     credentials: true,
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:8080', // for local development
-      'https://coursespace-production.up.railway.app', // for production
-    ], // for production
+    origin: ['http://localhost:3000', 'http://localhost:8080'],
   })
 )
 app.use(cookieParser())
 app.use(express.json())
 
-//  Sign Up Route (Register)
+// Initialize Razorpay with your test credentials
+const razorpay = new Razorpay({
+  key_id: 'rzp_test_mUSjI5TdDnWLE9',
+  key_secret: 'iXhsC3lJOjbPXwNoSkRUHheV',
+})
+
+// API Endpoints
+
+// Create Razorpay Order
+app.post('/api/create-order', async (req, res) => {
+  try {
+    const { amount, courseId } = req.body
+
+    if (!amount || !courseId) {
+      return res.status(400).json({ error: 'Amount and course ID are required' })
+    }
+
+    const options = {
+      amount: amount * 100, // Convert to paise
+      currency: 'INR',
+      receipt: `order_${Date.now()}`,
+      notes: {
+        courseId,
+        purpose: 'course_payment',
+      },
+    }
+
+    const order = await razorpay.orders.create(options)
+    res.json(order)
+  } catch (err) {
+    console.error('Order creation error:', err)
+    res.status(500).json({ error: 'Failed to create order' })
+  }
+})
+
+// Verify Payment
+app.post('/api/verify-payment', async (req, res) => {
+  try {
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, courseId } = req.body
+
+    // Create signature
+    const generatedSignature = crypto
+      .createHmac('sha256', 'iXhsC3lJOjbPXwNoSkRUHheV')
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex')
+
+    // Verify signature
+    if (generatedSignature !== razorpay_signature) {
+      return res.status(400).json({ error: 'Invalid payment signature' })
+    }
+
+    // Create enrollment record
+    const enrollment = new Enrollment({
+      courseId,
+      paymentId: razorpay_payment_id,
+      orderId: razorpay_order_id,
+      status: 'completed',
+    })
+    await enrollment.save()
+
+    res.json({
+      success: true,
+      message: 'Payment verified successfully',
+      paymentId: razorpay_payment_id,
+    })
+  } catch (err) {
+    console.error('Payment verification error:', err)
+    res.status(500).json({ error: 'Payment verification failed' })
+  }
+})
+
+// Get Razorpay Key (safe to expose)
+app.get('/api/get-razorpay-key', (req, res) => {
+  res.json({ key: 'rzp_test_mUSjI5TdDnWLE9' })
+})
+
+// Auth Routes
 app.post('/signup', async (req, res) => {
   try {
     const { email, password } = req.body
 
-    // Check if user already exists
     let user = await User.findOne({ email })
     if (user) {
       return res.status(400).json({ error: 'User already exists' })
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
 
-    // Create new user
     user = new User({ email, password: hashedPassword })
     await user.save()
 
@@ -55,32 +126,27 @@ app.post('/signup', async (req, res) => {
   }
 })
 
-//  Sign In Route (Login)
 app.post('/signin', async (req, res) => {
   try {
     const { email, password } = req.body
 
-    // Check if user exists
     const user = await User.findOne({ email })
     if (!user) {
       return res.status(400).json({ error: 'User not found' })
     }
 
-    // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) {
       return res.status(400).json({ error: 'Invalid credentials' })
     }
 
-    // Generate JWT token
     const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
-      expiresIn: '7d', // Token expires in 7 days
+      expiresIn: '7d',
     })
 
-    // Send token in HTTP-Only Cookie
     res.cookie('token', token, {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'Lax',
     })
 
@@ -91,13 +157,12 @@ app.post('/signin', async (req, res) => {
   }
 })
 
-//  Logout Route (Clear Cookie)
 app.post('/logout', (req, res) => {
   res.clearCookie('token')
   res.json({ message: 'Logged out successfully' })
 })
 
-//  Middleware to Protect Routes
+// Auth Middleware
 const authMiddleware = (req, res, next) => {
   const token = req.cookies.token
   if (!token) return res.status(401).json({ error: 'Unauthorized' })
@@ -111,53 +176,13 @@ const authMiddleware = (req, res, next) => {
   }
 }
 
-//  Get Logged-in User
+// Protected Routes
 app.get('/user', authMiddleware, async (req, res) => {
   const user = await User.findById(req.user.id).select('-password')
   res.json({ user })
 })
 
-//  Enrollment Route (For Enrolling Users)
-app.post('/enroll', authMiddleware, async (req, res) => {
-  const { name, dob, age, course } = req.body
-
-  // Check if all fields are provided
-  if (!name || !dob || !age || !course) {
-    return res.status(400).json({ error: 'All fields are required' })
-  }
-
-  try {
-    // new enrollment entry in MongoDB
-    const newEnrollment = new Enrollment({
-      name,
-      dob,
-      age,
-      course,
-      userId: req.user.id,
-    })
-
-    // Save the enrollment
-    await newEnrollment.save()
-
-    res.json({ message: 'Enrollment successful' })
-  } catch (error) {
-    console.error('Enrollment error:', error)
-    res.status(500).json({ error: 'Failed to enroll, please try again' })
-  }
-})
-
-// Get All Enrolled Students
-app.get('/enrollments', async (req, res) => {
-  try {
-    const enrollments = await Enrollment.find()
-    res.json(enrollments)
-  } catch (error) {
-    console.error('Fetch enrollments error:', error)
-    res.status(500).json({ error: 'Failed to fetch enrollments' })
-  }
-})
-
-// Create Course
+// Course Routes
 app.post('/courses', authMiddleware, async (req, res) => {
   try {
     const course = new Course(req.body)
@@ -168,7 +193,6 @@ app.post('/courses', authMiddleware, async (req, res) => {
   }
 })
 
-// Get All Courses
 app.get('/courses', async (req, res) => {
   try {
     const courses = await Course.find()
@@ -178,7 +202,6 @@ app.get('/courses', async (req, res) => {
   }
 })
 
-// Update Course
 app.put('/courses/:id', authMiddleware, async (req, res) => {
   try {
     const updated = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true })
@@ -188,7 +211,6 @@ app.put('/courses/:id', authMiddleware, async (req, res) => {
   }
 })
 
-// Delete Course
 app.delete('/courses/:id', authMiddleware, async (req, res) => {
   try {
     await Course.findByIdAndDelete(req.params.id)
@@ -198,6 +220,7 @@ app.delete('/courses/:id', authMiddleware, async (req, res) => {
   }
 })
 
+// Quiz Routes
 app.post('/api/scores', async (req, res) => {
   const { quizuserName, score, totalQuestions, percentage, categories } = req.body
 
@@ -224,10 +247,7 @@ app.post('/api/scores', async (req, res) => {
   }
 })
 
-//  Start Serve
-
 const PORT = process.env.PORT || 5000
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })

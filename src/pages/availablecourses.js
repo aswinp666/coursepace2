@@ -1,20 +1,43 @@
 import React, { useEffect, useState } from 'react'
+import axios from 'axios'
 
 const CoursesPage = () => {
   const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false)
 
+  // Load Razorpay script when component mounts
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.async = true
+
+    script.onload = () => {
+      setRazorpayLoaded(true)
+    }
+
+    script.onerror = () => {
+      setError('Failed to load Razorpay SDK')
+      setRazorpayLoaded(false)
+    }
+
+    document.body.appendChild(script)
+
+    return () => {
+      document.body.removeChild(script)
+    }
+  }, [])
+
+  // Fetch courses
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await fetch('http://localhost:5000/courses')
-        if (!res.ok) throw new Error('Failed to fetch courses')
-        const data = await res.json()
-        setCourses(data)
+        const res = await axios.get('http://localhost:5000/courses')
+        setCourses(res.data)
         setLoading(false)
       } catch (err) {
-        setError(err.message || 'Something went wrong')
+        setError(err.response?.data?.error || 'Failed to fetch courses')
         setLoading(false)
       }
     }
@@ -22,19 +45,94 @@ const CoursesPage = () => {
     fetchCourses()
   }, [])
 
-  // Base styles
+  const verifyPayment = async (paymentResponse, course) => {
+    try {
+      const res = await axios.post('http://localhost:5000/verify-payment', {
+        razorpay_payment_id: paymentResponse.razorpay_payment_id,
+        razorpay_order_id: paymentResponse.razorpay_order_id,
+        razorpay_signature: paymentResponse.razorpay_signature,
+        courseId: course._id,
+        amount: course.price * 100, // Convert to paise
+      })
+
+      return res.data.success
+    } catch (err) {
+      console.error('Verification error:', err)
+      return false
+    }
+  }
+
+  const handlePayment = async (course) => {
+    if (!razorpayLoaded) {
+      alert('Payment system is still loading. Please try again in a moment.')
+      return
+    }
+
+    try {
+      // Create order on your server
+      const orderRes = await axios.post('http://localhost:5000/create-order', {
+        amount: course.price * 100, // Convert to paise
+        currency: 'INR',
+        receipt: `course_${course._id}`,
+        notes: {
+          courseId: course._id,
+          courseTitle: course.title,
+        },
+      })
+
+      const options = {
+        key: 'rzp_test_mUSjI5TdDnWLE9', // Your Razorpay test key
+        amount: orderRes.data.amount,
+        currency: orderRes.data.currency,
+        name: 'CourseSpace Academy',
+        description: `Payment for ${course.title}`,
+        order_id: orderRes.data.id,
+        handler: async function (response) {
+          const verificationSuccess = await verifyPayment(response, course)
+
+          if (verificationSuccess) {
+            alert(`Payment Successful! Payment ID: ${response.razorpay_payment_id}`)
+            // You might want to redirect to a success page or update UI
+          } else {
+            alert('Payment verification failed. Please contact support.')
+          }
+        },
+        prefill: {
+          name: 'Student Name',
+          email: 'student@example.com',
+          contact: '+919876543210',
+        },
+        theme: {
+          color: '#127c71',
+        },
+      }
+
+      const rzp1 = new window.Razorpay(options)
+
+      rzp1.on('payment.failed', function (response) {
+        alert(`Payment failed: ${response.error.description}`)
+      })
+
+      rzp1.open()
+    } catch (err) {
+      console.error('Payment error:', err)
+      alert(`Payment failed: ${err.response?.data?.error || 'Unknown error'}`)
+    }
+  }
+
+  // Styles
   const containerStyle = {
     maxWidth: '1200px',
     margin: '0 auto',
     padding: '2rem',
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    background: '#fff', // White background for the container
+    background: '#fff',
     minHeight: '100vh',
   }
 
   const titleStyle = {
     fontSize: '2.5rem',
-    color: 'rgb(18, 124, 113)', // Using your specified color for text
+    color: 'rgb(18, 124, 113)',
     textAlign: 'center',
     marginBottom: '0.5rem',
     textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
@@ -47,7 +145,6 @@ const CoursesPage = () => {
     marginBottom: '2rem',
   }
 
-  // Courses grid
   const gridStyle = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
@@ -55,7 +152,6 @@ const CoursesPage = () => {
     marginTop: '2rem',
   }
 
-  // Course card - Green gradient background
   const cardStyle = {
     background: 'linear-gradient(135deg, rgba(18, 124, 113, 0.9) 0%, rgba(11, 82, 91, 0.9) 100%)',
     borderRadius: '15px',
@@ -66,17 +162,6 @@ const CoursesPage = () => {
     color: '#fff',
     position: 'relative',
     overflow: 'hidden',
-    '::before': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'rgba(255, 255, 255, 0.1)',
-      backdropFilter: 'blur(5px)',
-      zIndex: 0,
-    },
   }
 
   const cardHeaderStyle = {
@@ -85,7 +170,7 @@ const CoursesPage = () => {
     alignItems: 'center',
     marginBottom: '1rem',
     position: 'relative',
-    zIndex: 1,
+    zIndex: '1',
   }
 
   const cardTitleStyle = {
@@ -99,19 +184,9 @@ const CoursesPage = () => {
     borderRadius: '20px',
     fontSize: '0.8rem',
     fontWeight: '600',
-    background:
-      level === 'Beginner'
-        ? 'rgba(255, 255, 255, 0.3)'
-        : level === 'Intermediate'
-        ? 'rgba(255, 255, 255, 0.3)'
-        : 'rgba(255, 255, 255, 0.3)',
-    color: level === 'Beginner' ? '#fff' : level === 'Intermediate' ? '#fff' : '#fff',
-    border:
-      level === 'Beginner'
-        ? '1px solid rgba(255, 255, 255, 0.5)'
-        : level === 'Intermediate'
-        ? '1px solid rgba(255, 255, 255, 0.5)'
-        : '1px solid rgba(255, 255, 255, 0.5)',
+    background: 'rgba(255, 255, 255, 0.3)',
+    color: '#fff',
+    border: '1px solid rgba(255, 255, 255, 0.5)',
   })
 
   const descriptionStyle = {
@@ -119,7 +194,7 @@ const CoursesPage = () => {
     lineHeight: '1.5',
     color: 'rgba(255, 255, 255, 0.9)',
     position: 'relative',
-    zIndex: 1,
+    zIndex: '1',
   }
 
   const detailsStyle = {
@@ -128,7 +203,7 @@ const CoursesPage = () => {
     gap: '0.5rem',
     marginBottom: '1.5rem',
     position: 'relative',
-    zIndex: 1,
+    zIndex: '1',
   }
 
   const detailRowStyle = {
@@ -146,6 +221,13 @@ const CoursesPage = () => {
     color: '#fff',
   }
 
+  const priceStyle = {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    margin: '1rem 0',
+    textAlign: 'center',
+  }
+
   const buttonStyle = {
     width: '100%',
     padding: '0.75rem',
@@ -160,7 +242,7 @@ const CoursesPage = () => {
     backdropFilter: 'blur(5px)',
     border: '1px solid rgba(255, 255, 255, 0.3)',
     position: 'relative',
-    zIndex: 1,
+    zIndex: '1',
   }
 
   return (
@@ -192,6 +274,9 @@ const CoursesPage = () => {
                 <span style={levelStyle(course.level)}>{course.level}</span>
               </div>
               <p style={descriptionStyle}>{course.description}</p>
+
+              <div style={priceStyle}>₹{course.price}</div>
+
               <div style={detailsStyle}>
                 <div style={detailRowStyle}>
                   <span style={detailLabelStyle}>Duration:</span>
@@ -213,8 +298,10 @@ const CoursesPage = () => {
                   e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
                   e.currentTarget.style.boxShadow = 'none'
                 }}
+                onClick={() => handlePayment(course)}
+                disabled={!razorpayLoaded}
               >
-                Apply Now
+                {razorpayLoaded ? 'Enroll Now' : 'Loading Payment...'}
               </button>
             </div>
           ))}
