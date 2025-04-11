@@ -275,7 +275,7 @@ const CoursesPage = () => {
               </div>
               <p style={descriptionStyle}>{course.description}</p>
 
-              <div style={priceStyle}>₹{course.price}</div>
+              <div style={priceStyle}>₹ 1{course.price}</div>
 
               <div style={detailsStyle}>
                 <div style={detailRowStyle}>
