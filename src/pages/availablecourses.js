@@ -70,7 +70,7 @@ const CoursesPage = () => {
 
     try {
       // Create order on your server
-      const orderRes = await axios.post('http://localhost:5000/create-order', {
+      const orderRes = await axios.post('http://localhost:5000/api/create-order', {
         amount: course.price * 100, // Convert to paise
         currency: 'INR',
         receipt: `course_${course._id}`,
