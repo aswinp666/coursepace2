@@ -71,9 +71,10 @@ const CoursesPage = () => {
 
       const options = {
         key: 'rzp_test_mUSjI5TdDnWLE9',
-        amount: data.order.amount,
+        amount: data.amount, // ← Directly data.amount
         currency: 'INR',
-        order_id: data.order.id,
+        order_id: data.id, // ← Directly data.id
+
         handler: async function (response) {
           await axios.post('/api/payment/verify', {
             razorpay_order_id: response.razorpay_order_id,
