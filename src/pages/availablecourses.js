@@ -29,7 +29,7 @@ const CoursesPage = () => {
     }
   }, [])
 
-  // Fetch courses
+  // Fetch course
   useEffect(() => {
     const fetchCourses = async () => {
       try {
