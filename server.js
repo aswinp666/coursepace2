@@ -55,7 +55,7 @@ app.post('/api/create-order', async (req, res) => {
     }
 
     const order = await razorpay.orders.create(options)
-    res.json(order)
+    res.json({ order })
   } catch (err) {
     console.error('Order creation error:', err)
     res.status(500).json({ error: 'Failed to create order' })
