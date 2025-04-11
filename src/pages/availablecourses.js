@@ -64,9 +64,9 @@ const CoursesPage = () => {
 
   const handlePayment = async (course) => {
     try {
-      const { data } = await axios.post('/api/payment/checkout', {
-        amount: course.price, // auto send price
-        courseId: course._id, // auto send course id
+      const { data } = await axios.post('/api/payment/orders', {
+        amount: course.price,
+        courseId: course._id,
       })
 
       const options = {
@@ -75,12 +75,11 @@ const CoursesPage = () => {
         currency: 'INR',
         order_id: data.order.id,
         handler: async function (response) {
-          // payment success → verify payment
           await axios.post('/api/payment/verify', {
             razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_signature: response.razorpay_signature,
-            courseId: course._id, // enroll user for this course
+            courseId: course._id,
           })
 
           alert('Payment Successful & Course Enrolled!')
