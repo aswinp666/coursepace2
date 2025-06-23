@@ -12,9 +12,16 @@ const Header: FC = () => {
   const [visibleMenu, setVisibleMenu] = useState<boolean>(false)
   const { breakpoints } = useTheme()
   const matchMobileView = useMediaQuery(breakpoints.down('md'))
+  const { palette } = useTheme() // Added to access theme palette for background
 
   return (
-    <Box sx={{ backgroundColor: 'background.paper' }}>
+    <Box sx={{
+      backgroundColor: palette.background.paper, // Ensure background for sticky
+      position: 'sticky', // Make header sticky
+      top: 0, // Stick to the top
+      zIndex: 1100, // Ensure it's above other content
+      boxShadow: '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)', // Optional: add shadow
+    }}>
       <Container sx={{ py: { xs: 2, md: 3 } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Logo />

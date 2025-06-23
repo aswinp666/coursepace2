@@ -24,7 +24,12 @@ const App: FC<AppPropsWithLayout> = (props: AppPropsWithLayout) => {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
 
   // Use the layout defined at the page level, if available
-  const getLayout = Component.getLayout || ((page) => page)
+  // const getLayout = Component.getLayout || ((page) => page)
+
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const MainLayout = require('@/components/layout/main-layout').default
+
+  const getLayout = Component.getLayout || ((page) => <MainLayout>{page}</MainLayout>)
 
   return (
     <CacheProvider value={emotionCache}>
