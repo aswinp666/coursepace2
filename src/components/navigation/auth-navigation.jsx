@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-// MUI Imports for Modal and Button might be needed if we use MUI components for the modal
-// For now, simple button and basic modal logic first.
-// import Button from '@mui/material/Button';
-// import Modal from '@mui/material/Modal';
-// import Box from '@mui/material/Box';
-// import Typography from '@mui/material/Typography';
 import WishlistModal from '../wishlist/wishlist-modal' // Import the modal
-import { data as allCourses } from '../home/popular-course.data' // Import course data
+
+// Import the staticCoursesData from availablecourses.js
+// Ensure the path is correct based on your project structure.
+import { staticCoursesData as allAvailableCourses } from '../../pages/availablecourses' //
 
 const AuthNavigation = () => {
   const [user, setUser] = useState(null)
@@ -17,20 +14,22 @@ const AuthNavigation = () => {
 
   const loadWishlistItems = () => {
     if (typeof window !== 'undefined') {
-      const storedWishlistIds = JSON.parse(localStorage.getItem('wishlist') || '[]')
-      const items = allCourses.filter((course) => storedWishlistIds.includes(course.id.toString()))
-      setWishlistItems(items)
+      const storedWishlistIds = JSON.parse(localStorage.getItem('wishlist') || '[]') //
+
+      // Filter from the correct course data and use the _id property
+      const items = allAvailableCourses.filter((course) => storedWishlistIds.includes(course._id.toString())) //
+      setWishlistItems(items) //
     }
   }
 
   // Function to open wishlist modal
   const handleOpenWishlistModal = () => {
-    loadWishlistItems()
-    setShowWishlistModal(true)
+    loadWishlistItems() //
+    setShowWishlistModal(true) //
   }
 
   const handleCloseWishlistModal = () => {
-    setShowWishlistModal(false)
+    setShowWishlistModal(false) //
   }
 
   useEffect(() => {
@@ -54,15 +53,16 @@ const AuthNavigation = () => {
 
     // Listener for wishlist updates
     const handleWishlistUpdate = () => {
-      if (showWishlistModal) { // Only reload if modal is currently open
-        loadWishlistItems()
+      if (showWishlistModal) {
+        // Only reload if modal is currently open
+        loadWishlistItems() //
       }
     }
 
-    window.addEventListener('wishlistUpdated', handleWishlistUpdate)
+    window.addEventListener('wishlistUpdated', handleWishlistUpdate) //
 
     return () => {
-      window.removeEventListener('wishlistUpdated', handleWishlistUpdate)
+      window.removeEventListener('wishlistUpdated', handleWishlistUpdate) //
     }
   }, [showWishlistModal]) // Add showWishlistModal to dependencies to re-evaluate listener if modal state changes
 
@@ -85,7 +85,7 @@ const AuthNavigation = () => {
 
           <span>Welcome, {user.email}</span>
           <button
-            onClick={handleOpenWishlistModal}
+            onClick={handleOpenWishlistModal} //
             style={{
               backgroundColor: '#55CDBA', // A different color for distinction
               color: 'white',

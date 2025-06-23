@@ -1,147 +1,148 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios' // Still imported, but not used for initial data fetch
 
-const CoursesPage = () => {
-  // --- STATIC COURSE DATA ---
-  const staticCoursesData = [
-    {
-      _id: 'c001',
-      title: 'AWS Certified Solutions Architect',
-      description: 'Master the design of scalable systems on Amazon Web Services (AWS).',
-      category: 'Cloud Computing',
-      duration: '40 hours',
-      instructor: 'Alice Johnson',
-      level: 'Advanced',
-    },
-    {
-      _id: 'c002',
-      title: 'Introduction to Machine Learning with Python',
-      description: 'Learn the fundamentals of ML using Python and popular libraries like Scikit-learn.',
-      category: 'Artificial Intelligence',
-      duration: '30 hours',
-      instructor: 'Bob Smith',
-      level: 'Intermediate',
-    },
-    {
-      _id: 'c003',
-      title: 'React - The Complete Guide (incl Hooks, React Router, Redux)',
-      description: 'Build powerful, declarative, and maintainable user interfaces with React.',
-      category: 'Web Development',
-      duration: '50 hours',
-      instructor: 'Max Schwarzmüller',
-      level: 'All Levels',
-    },
-    {
-      _id: 'c004',
-      title: 'DevOps Masterclass: Docker, Kubernetes, Jenkins',
-      description: 'Automate your software delivery pipeline with industry-leading DevOps tools.',
-      category: 'DevOps',
-      duration: '60 hours',
-      instructor: 'Chris Miller',
-      level: 'Advanced',
-    },
-    {
-      _id: 'c005',
-      title: 'Azure Fundamentals (AZ-900) Certification Prep',
-      description: 'Get started with Microsoft Azure cloud services and prepare for the AZ-900 exam.',
-      category: 'Cloud Computing',
-      duration: '25 hours',
-      instructor: 'Sarah Davis',
-      level: 'Beginner',
-    },
-    {
-      _id: 'c006',
-      title: 'Advanced Deep Learning with TensorFlow 2.x',
-      description: 'Dive deep into neural networks, CNNs, RNNs, and more using TensorFlow.',
-      category: 'Artificial Intelligence',
-      duration: '45 hours',
-      instructor: 'Dr. Emily White',
-      level: 'Advanced',
-    },
-    {
-      _id: 'c007',
-      title: 'Node.js, Express, MongoDB & More: The Masterclass',
-      description: 'Build robust RESTful APIs with Node.js, Express, and MongoDB.',
-      category: 'Web Development',
-      duration: '35 hours',
-      instructor: 'John Doe',
-      level: 'Intermediate',
-    },
-    {
-      _id: 'c008',
-      title: 'Google Cloud Platform (GCP) Fundamentals',
-      description: 'Understand the core services and architecture of Google Cloud Platform.',
-      category: 'Cloud Computing',
-      duration: '20 hours',
-      instructor: 'Olivia Green',
-      level: 'Beginner',
-    },
-    {
-      _id: 'c009',
-      title: 'Natural Language Processing (NLP) with Python',
-      description: 'Process and understand human language using Python and NLTK.',
-      category: 'Artificial Intelligence',
-      duration: '28 hours',
-      instructor: 'David Lee',
-      level: 'Intermediate',
-    },
-    {
-      _id: 'c010',
-      title: 'Complete Web Development Bootcamp 2024',
-      description: 'Learn HTML, CSS, JavaScript, Node, React, MongoDB and build real-world projects.',
-      category: 'Web Development',
-      duration: '70 hours',
-      instructor: 'Angela Yu',
-      level: 'All Levels',
-    },
-    {
-      _id: 'c011',
-      title: 'Certified Ethical Hacker (CEH) v12',
-      description: 'Master ethical hacking techniques and tools to become a cybersecurity expert.',
-      category: 'Cybersecurity',
-      duration: '55 hours',
-      instructor: 'Sophia Turner',
-      level: 'Advanced',
-    },
-    {
-      _id: 'c012',
-      title: 'Python for Data Science and Machine Learning',
-      description: 'Learn to use Python for data analysis, visualization, and machine learning.',
-      category: 'Data Science',
-      duration: '40 hours',
-      instructor: 'Frank Adams',
-      level: 'Intermediate',
-    },
-    {
-      _id: 'c013',
-      title: 'iOS App Development with Swift 5 and SwiftUI',
-      description: "Build native iOS applications from scratch using Apple's latest technologies.",
-      category: 'Mobile Development',
-      duration: '48 hours',
-      instructor: 'Grace Wilson',
-      level: 'Intermediate',
-    },
-    {
-      _id: 'c014',
-      title: 'SQL & Database Design for Developers',
-      description: 'Learn SQL fundamentals, relational database design, and advanced querying.',
-      category: 'Database Management',
-      duration: '22 hours',
-      instructor: 'Henry Clark',
-      level: 'Beginner',
-    },
-    {
-      _id: 'c015',
-      title: 'Linux Command Line Basics',
-      description: 'Master the Linux command line for system administration and development.',
-      category: 'DevOps',
-      duration: '15 hours',
-      instructor: "Patty O'Connell",
-      level: 'Beginner',
-    },
-  ]
-  // -------------------------
+// --- STATIC COURSE DATA ---
+// ADD 'export' KEYWORD HERE
+export const staticCoursesData = [
+  {
+    _id: 'c001',
+    title: 'AWS Certified Solutions Architect',
+    description: 'Master the design of scalable systems on Amazon Web Services (AWS).',
+    category: 'Cloud Computing',
+    duration: '40 hours',
+    instructor: 'Alice Johnson',
+    level: 'Advanced',
+  },
+  {
+    _id: 'c002',
+    title: 'Introduction to Machine Learning with Python',
+    description: 'Learn the fundamentals of ML using Python and popular libraries like Scikit-learn.',
+    category: 'Artificial Intelligence',
+    duration: '30 hours',
+    instructor: 'Bob Smith',
+    level: 'Intermediate',
+  },
+  {
+    _id: 'c003',
+    title: 'React - The Complete Guide (incl Hooks, React Router, Redux)',
+    description: 'Build powerful, declarative, and maintainable user interfaces with React.',
+    category: 'Web Development',
+    duration: '50 hours',
+    instructor: 'Max Schwarzmüller',
+    level: 'All Levels',
+  },
+  {
+    _id: 'c004',
+    title: 'DevOps Masterclass: Docker, Kubernetes, Jenkins',
+    description: 'Automate your software delivery pipeline with industry-leading DevOps tools.',
+    category: 'DevOps',
+    duration: '60 hours',
+    instructor: 'Chris Miller',
+    level: 'Advanced',
+  },
+  {
+    _id: 'c005',
+    title: 'Azure Fundamentals (AZ-900) Certification Prep',
+    description: 'Get started with Microsoft Azure cloud services and prepare for the AZ-900 exam.',
+    category: 'Cloud Computing',
+    duration: '25 hours',
+    instructor: 'Sarah Davis',
+    level: 'Beginner',
+  },
+  {
+    _id: 'c006',
+    title: 'Advanced Deep Learning with TensorFlow 2.x',
+    description: 'Dive deep into neural networks, CNNs, RNNs, and more using TensorFlow.',
+    category: 'Artificial Intelligence',
+    duration: '45 hours',
+    instructor: 'Dr. Emily White',
+    level: 'Advanced',
+  },
+  {
+    _id: 'c007',
+    title: 'Node.js, Express, MongoDB & More: The Masterclass',
+    description: 'Build robust RESTful APIs with Node.js, Express, and MongoDB.',
+    category: 'Web Development',
+    duration: '35 hours',
+    instructor: 'John Doe',
+    level: 'Intermediate',
+  },
+  {
+    _id: 'c008',
+    title: 'Google Cloud Platform (GCP) Fundamentals',
+    description: 'Understand the core services and architecture of Google Cloud Platform.',
+    category: 'Cloud Computing',
+    duration: '20 hours',
+    instructor: 'Olivia Green',
+    level: 'Beginner',
+  },
+  {
+    _id: 'c009',
+    title: 'Natural Language Processing (NLP) with Python',
+    description: 'Process and understand human language using Python and NLTK.',
+    category: 'Artificial Intelligence',
+    duration: '28 hours',
+    instructor: 'David Lee',
+    level: 'Intermediate',
+  },
+  {
+    _id: 'c010',
+    title: 'Complete Web Development Bootcamp 2024',
+    description: 'Learn HTML, CSS, JavaScript, Node, React, MongoDB and build real-world projects.',
+    category: 'Web Development',
+    duration: '70 hours',
+    instructor: 'Angela Yu',
+    level: 'All Levels',
+  },
+  {
+    _id: 'c011',
+    title: 'Certified Ethical Hacker (CEH) v12',
+    description: 'Master ethical hacking techniques and tools to become a cybersecurity expert.',
+    category: 'Cybersecurity',
+    duration: '55 hours',
+    instructor: 'Sophia Turner',
+    level: 'Advanced',
+  },
+  {
+    _id: 'c012',
+    title: 'Python for Data Science and Machine Learning',
+    description: 'Learn to use Python for data analysis, visualization, and machine learning.',
+    category: 'Data Science',
+    duration: '40 hours',
+    instructor: 'Frank Adams',
+    level: 'Intermediate',
+  },
+  {
+    _id: 'c013',
+    title: 'iOS App Development with Swift 5 and SwiftUI',
+    description: "Build native iOS applications from scratch using Apple's latest technologies.",
+    category: 'Mobile Development',
+    duration: '48 hours',
+    instructor: 'Grace Wilson',
+    level: 'Intermediate',
+  },
+  {
+    _id: 'c014',
+    title: 'SQL & Database Design for Developers',
+    description: 'Learn SQL fundamentals, relational database design, and advanced querying.',
+    category: 'Database Management',
+    duration: '22 hours',
+    instructor: 'Henry Clark',
+    level: 'Beginner',
+  },
+  {
+    _id: 'c015',
+    title: 'Linux Command Line Basics',
+    description: 'Master the Linux command line for system administration and development.',
+    category: 'DevOps',
+    duration: '15 hours',
+    instructor: "Patty O'Connell",
+    level: 'Beginner',
+  },
+]
+// -------------------------
 
+const CoursesPage = () => {
   const [courses, setCourses] = useState([])
   const [filteredCourses, setFilteredCourses] = useState([])
   const [selectedCategory, setSelectedCategory] = useState('All')
@@ -152,7 +153,8 @@ const CoursesPage = () => {
   const [wishlist, setWishlist] = useState(() => {
     // Initialize wishlist from localStorage if available
     try {
-      const storedWishlist = localStorage.getItem('courseWishlist')
+      // Changed from 'courseWishlist' to 'wishlist' (from previous turn's fix)
+      const storedWishlist = localStorage.getItem('wishlist')
       return storedWishlist ? JSON.parse(storedWishlist) : []
     } catch (e) {
       console.error('Failed to load wishlist from localStorage', e)
@@ -214,7 +216,9 @@ const CoursesPage = () => {
   // Save wishlist to localStorage whenever it changes
   useEffect(() => {
     try {
-      localStorage.setItem('courseWishlist', JSON.stringify(wishlist))
+      // Changed from 'courseWishlist' to 'wishlist' (from previous turn's fix)
+      localStorage.setItem('wishlist', JSON.stringify(wishlist))
+      window.dispatchEvent(new CustomEvent('wishlistUpdated'))
     } catch (e) {
       console.error('Failed to save wishlist to localStorage', e)
     }

@@ -35,7 +35,7 @@ const CourseCardItem: FC<Props> = ({ item }) => {
     localStorage.setItem('wishlist', JSON.stringify(wishlist))
     setIsWishlisted(!isWishlisted)
     // Optionally, dispatch an event or use a global state to update the wishlist modal if it's open
-    window.dispatchEvent(new CustomEvent('wishlistUpdated'))
+    window.dispatchEvent(new CustomEvent('wishlistUpdated')) //
   }
 
   return (
@@ -93,7 +93,7 @@ const CourseCardItem: FC<Props> = ({ item }) => {
             <IconButton
               onClick={handleWishlistToggle}
               color={isWishlisted ? "error" : "default"} // Change color if wishlisted
-              sx={{ mr: 1, '&:hover': { backgroundColor: isWishlisted? 'rgba(255,0,0,0.1)' :'rgba(0,0,0,0.04)' } }} // Slight background change on hover
+              sx={{ mr: 1, '&:hover': { backgroundColor: isWishlisted ? 'rgba(255,0,0,0.1)' : 'rgba(0,0,0,0.04)' } }} // Slight background change on hover
             >
               {isWishlisted ? <FavoriteIcon /> : <FavoriteBorderIcon />}
             </IconButton>

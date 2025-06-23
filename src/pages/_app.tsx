@@ -12,6 +12,9 @@ import '@/styles/react-slick.css'
 import { NextPageWithLayout } from '@/interfaces/layout'
 // import 'slick-carousel/slick/slick-theme.css'
 
+// CORRECTED IMPORT: Use standard import for MainLayout
+import MainLayout from '@/components/layout/main-layout' // Changed from require()
+
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
 
@@ -24,11 +27,6 @@ const App: FC<AppPropsWithLayout> = (props: AppPropsWithLayout) => {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
 
   // Use the layout defined at the page level, if available
-  // const getLayout = Component.getLayout || ((page) => page)
-
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const MainLayout = require('@/components/layout/main-layout').default
-
   const getLayout = Component.getLayout || ((page) => <MainLayout>{page}</MainLayout>)
 
   return (

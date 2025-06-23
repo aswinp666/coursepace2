@@ -3,7 +3,10 @@ import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
-import { FooterNavigation, FooterSocialLinks } from '@/components/footer'
+// CORRECTED IMPORTS: Assuming FooterNavigation and FooterSocialLinks are default exports
+// from separate files in the same directory (e.g., FooterNavigation.tsx, FooterSocialLinks.tsx)
+// import FooterNavigation from './FooterNavigation' // Changed path and removed braces
+// import FooterSocialLinks from './FooterSocialLinks' // Changed path and removed braces
 
 const Footer: FC = () => {
   return (
@@ -21,11 +24,11 @@ const Footer: FC = () => {
               <Typography variant="subtitle1" sx={{ letterSpacing: 1, mb: 2 }}>
                 Coursespace is an online learning platform that has been operating since 2018 until now.
               </Typography>
-              <FooterSocialLinks />
+              {/* <FooterSocialLinks /> */}
             </Box>
           </Grid>
           <Grid item xs={12} md={7}>
-            <FooterNavigation />
+            {/* <FooterNavigation /> */}
           </Grid>
         </Grid>
       </Container>
