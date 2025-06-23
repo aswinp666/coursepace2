@@ -2,10 +2,167 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 
 const CoursesPage = () => {
+  // --- STATIC COURSE DATA ---
+  // (Keeping this consistent with the previous version for demonstration)
+  const staticCoursesData = [
+    {
+      _id: 'c001',
+      title: 'AWS Certified Solutions Architect',
+      description: 'Master the design of scalable systems on Amazon Web Services (AWS).',
+      category: 'Cloud Computing', // Aligned with new categories
+      duration: '40 hours',
+      instructor: 'Alice Johnson',
+      level: 'Advanced',
+    },
+    {
+      _id: 'c002',
+      title: 'Introduction to Machine Learning with Python',
+      description: 'Learn the fundamentals of ML using Python and popular libraries like Scikit-learn.',
+      category: 'Artificial Intelligence', // Aligned with new categories
+      duration: '30 hours',
+      instructor: 'Bob Smith',
+      level: 'Intermediate',
+    },
+    {
+      _id: 'c003',
+      title: 'React - The Complete Guide (incl Hooks, React Router, Redux)',
+      description: 'Build powerful, declarative, and maintainable user interfaces with React.',
+      category: 'Web Development', // Aligned with new categories
+      duration: '50 hours',
+      instructor: 'Max Schwarzmüller',
+      level: 'All Levels',
+    },
+    {
+      _id: 'c004',
+      title: 'DevOps Masterclass: Docker, Kubernetes, Jenkins',
+      description: 'Automate your software delivery pipeline with industry-leading DevOps tools.',
+      category: 'DevOps', // Aligned with new categories
+      duration: '60 hours',
+      instructor: 'Chris Miller',
+      level: 'Advanced',
+    },
+    {
+      _id: 'c005',
+      title: 'Azure Fundamentals (AZ-900) Certification Prep',
+      description: 'Get started with Microsoft Azure cloud services and prepare for the AZ-900 exam.',
+      category: 'Cloud Computing', // Aligned with new categories
+      duration: '25 hours',
+      instructor: 'Sarah Davis',
+      level: 'Beginner',
+    },
+    {
+      _id: 'c006',
+      title: 'Advanced Deep Learning with TensorFlow 2.x',
+      description: 'Dive deep into neural networks, CNNs, RNNs, and more using TensorFlow.',
+      category: 'Artificial Intelligence', // Aligned with new categories
+      duration: '45 hours',
+      instructor: 'Dr. Emily White',
+      level: 'Advanced',
+    },
+    {
+      _id: 'c007',
+      title: 'Node.js, Express, MongoDB & More: The Masterclass',
+      description: 'Build robust RESTful APIs with Node.js, Express, and MongoDB.',
+      category: 'Web Development', // Aligned with new categories
+      duration: '35 hours',
+      instructor: 'John Doe',
+      level: 'Intermediate',
+    },
+    {
+      _id: 'c008',
+      title: 'Google Cloud Platform (GCP) Fundamentals',
+      description: 'Understand the core services and architecture of Google Cloud Platform.',
+      category: 'Cloud Computing', // Aligned with new categories
+      duration: '20 hours',
+      instructor: 'Olivia Green',
+      level: 'Beginner',
+    },
+    {
+      _id: 'c009',
+      title: 'Natural Language Processing (NLP) with Python',
+      description: 'Process and understand human language using Python and NLTK.',
+      category: 'Artificial Intelligence', // Aligned with new categories
+      duration: '28 hours',
+      instructor: 'David Lee',
+      level: 'Intermediate',
+    },
+    {
+      _id: 'c010',
+      title: 'Complete Web Development Bootcamp 2024',
+      description: 'Learn HTML, CSS, JavaScript, Node, React, MongoDB and build real-world projects.',
+      category: 'Web Development', // Aligned with new categories
+      duration: '70 hours',
+      instructor: 'Angela Yu',
+      level: 'All Levels',
+    },
+    {
+      _id: 'c011',
+      title: 'Certified Ethical Hacker (CEH) v12',
+      description: 'Master ethical hacking techniques and tools to become a cybersecurity expert.',
+      category: 'Cybersecurity', // Aligned with new categories
+      duration: '55 hours',
+      instructor: 'Sophia Turner',
+      level: 'Advanced',
+    },
+    {
+      _id: 'c012',
+      title: 'Python for Data Science and Machine Learning',
+      description: 'Learn to use Python for data analysis, visualization, and machine learning.',
+      category: 'Data Science', // Aligned with new categories
+      duration: '40 hours',
+      instructor: 'Frank Adams',
+      level: 'Intermediate',
+    },
+    {
+      _id: 'c013',
+      title: 'iOS App Development with Swift 5 and SwiftUI',
+      description: "Build native iOS applications from scratch using Apple's latest technologies.",
+      category: 'Mobile Development', // Aligned with new categories
+      duration: '48 hours',
+      instructor: 'Grace Wilson',
+      level: 'Intermediate',
+    },
+    {
+      _id: 'c014',
+      title: 'SQL & Database Design for Developers',
+      description: 'Learn SQL fundamentals, relational database design, and advanced querying.',
+      category: 'Database Management', // Aligned with new categories
+      duration: '22 hours',
+      instructor: 'Henry Clark',
+      level: 'Beginner',
+    },
+    {
+      _id: 'c015',
+      title: 'Linux Command Line Basics',
+      description: 'Master the Linux command line for system administration and development.',
+      category: 'DevOps', // Assigned to an existing category
+      duration: '15 hours',
+      instructor: "Patty O'Connell",
+      level: 'Beginner',
+    },
+  ]
+  // -------------------------
+
   const [courses, setCourses] = useState([])
+  const [filteredCourses, setFilteredCourses] = useState([])
+  const [selectedCategory, setSelectedCategory] = useState('All')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [razorpayLoaded, setRazorpayLoaded] = useState(false)
+
+  // --- MODIFIED: Streamlined categories (7 total, plus 'All') ---
+  const categories = [
+    'All',
+    'Cloud Computing',
+    'Web Development',
+    'Artificial Intelligence',
+    'Data Science',
+    'DevOps',
+    'Cybersecurity',
+    'Mobile Development',
+    'Database Management',
+  ]
+  // -------------------------------------------------------------
 
   // Load Razorpay script when component mounts
   useEffect(() => {
@@ -29,21 +186,30 @@ const CoursesPage = () => {
     }
   }, [])
 
-  // Fetch course
+  // Use static data instead of fetching from API
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const res = await axios.get('http://localhost:5000/courses')
-        setCourses(res.data)
-        setLoading(false)
-      } catch (err) {
-        setError(err.response?.data?.error || 'Failed to fetch courses')
-        setLoading(false)
-      }
-    }
-
-    fetchCourses()
+    // Simulate API fetch delay
+    setTimeout(() => {
+      const coursesWithRandomPrices = staticCoursesData.map((course) => {
+        const isFree = Math.random() < 0.2 // 20% chance of being free
+        return {
+          ...course,
+          price: isFree ? 0 : Math.floor(Math.random() * (2000 - 500 + 1)) + 500, // Prices between 500 and 2000
+        }
+      })
+      setCourses(coursesWithRandomPrices)
+      setLoading(false)
+    }, 500) // Simulate network delay
   }, [])
+
+  // Filter courses when 'courses' or 'selectedCategory' changes
+  useEffect(() => {
+    if (selectedCategory === 'All') {
+      setFilteredCourses(courses)
+    } else {
+      setFilteredCourses(courses.filter((course) => course.category === selectedCategory))
+    }
+  }, [courses, selectedCategory])
 
   const verifyPayment = async (paymentResponse, course) => {
     try {
@@ -63,17 +229,22 @@ const CoursesPage = () => {
   }
 
   const handlePayment = async (course) => {
+    if (course.price === 0) {
+      alert('Enrollment for free course successful!')
+      return
+    }
+
     try {
       const { data } = await axios.post('http://localhost:5000/api/create-order', {
-        amount: 1,
+        amount: course.price * 100,
         courseId: course._id,
       })
 
       const options = {
         key: 'rzp_test_mUSjI5TdDnWLE9',
-        amount: data.amount, // ← Directly data.amount
+        amount: data.amount,
         currency: 'INR',
-        order_id: data.id, // ← Directly data.id
+        order_id: data.id,
 
         handler: async function (response) {
           await axios.post('/api/payment/verify', {
@@ -98,7 +269,7 @@ const CoursesPage = () => {
     }
   }
 
-  // Styles
+  // Styles (unchanged for brevity)
   const containerStyle = {
     maxWidth: '1200px',
     margin: '0 auto',
@@ -123,6 +294,32 @@ const CoursesPage = () => {
     marginBottom: '2rem',
   }
 
+  const filterButtonsContainerStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '1rem',
+    marginBottom: '2rem',
+    flexWrap: 'wrap',
+  }
+
+  const filterButtonStyle = (isActive) => ({
+    padding: '0.75rem 1.5rem',
+    borderRadius: '25px',
+    border: `2px solid ${isActive ? 'rgb(18, 124, 113)' : 'rgba(0, 0, 0, 0.1)'}`,
+    background: isActive ? 'rgb(18, 124, 113)' : 'transparent',
+    color: isActive ? '#fff' : 'rgb(18, 124, 113)',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: isActive ? '0 4px 12px rgba(18, 124, 113, 0.3)' : 'none',
+    ':hover': {
+      background: isActive ? 'rgb(11, 82, 91)' : 'rgba(18, 124, 113, 0.05)',
+      borderColor: isActive ? 'rgb(11, 82, 91)' : 'rgb(18, 124, 113)',
+      color: isActive ? '#fff' : 'rgb(11, 82, 91)',
+    },
+  })
+
   const gridStyle = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
@@ -140,6 +337,20 @@ const CoursesPage = () => {
     color: '#fff',
     position: 'relative',
     overflow: 'hidden',
+  }
+
+  const freeLabelStyle = {
+    position: 'absolute',
+    top: '1rem',
+    right: '1rem',
+    background: '#FFD700',
+    color: '#000',
+    padding: '0.25rem 0.75rem',
+    borderRadius: '10px',
+    fontSize: '0.8rem',
+    fontWeight: 'bold',
+    zIndex: 2,
+    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
   }
 
   const cardHeaderStyle = {
@@ -226,7 +437,19 @@ const CoursesPage = () => {
   return (
     <div style={containerStyle}>
       <h1 style={titleStyle}>Available Courses</h1>
-      <p style={subtitleStyle}>Enhance your skills with our comprehensive React courses</p>
+      <p style={subtitleStyle}>Explore our diverse range of courses designed to boost your skills.</p>
+
+      <div style={filterButtonsContainerStyle}>
+        {categories.map((category) => (
+          <button
+            key={category}
+            style={filterButtonStyle(selectedCategory === category)}
+            onClick={() => setSelectedCategory(category)}
+          >
+            {category === 'All' ? 'All Courses' : `${category} Courses`}
+          </button>
+        ))}
+      </div>
 
       {loading ? (
         <p style={{ color: 'rgb(18, 124, 113)', textAlign: 'center' }}>Loading courses...</p>
@@ -234,55 +457,66 @@ const CoursesPage = () => {
         <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>
       ) : (
         <div style={gridStyle}>
-          {courses.map((course) => (
-            <div
-              key={course._id}
-              style={cardStyle}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-5px)'
-                e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.2)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = ''
-                e.currentTarget.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.1)'
-              }}
-            >
-              <div style={cardHeaderStyle}>
-                <h3 style={cardTitleStyle}>{course.title}</h3>
-                <span style={levelStyle(course.level)}>{course.level}</span>
-              </div>
-              <p style={descriptionStyle}>{course.description}</p>
-
-              <div style={priceStyle}>₹ 1{course.price}</div>
-
-              <div style={detailsStyle}>
-                <div style={detailRowStyle}>
-                  <span style={detailLabelStyle}>Duration:</span>
-                  <span style={detailValueStyle}>{course.duration}</span>
-                </div>
-                <div style={detailRowStyle}>
-                  <span style={detailLabelStyle}>Instructor:</span>
-                  <span style={detailValueStyle}>{course.instructor}</span>
-                </div>
-              </div>
-
-              <button
-                style={buttonStyle}
+          {filteredCourses.length > 0 ? (
+            filteredCourses.map((course) => (
+              <div
+                key={course._id}
+                style={cardStyle}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'
-                  e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 255, 255, 0.2)'
+                  e.currentTarget.style.transform = 'translateY(-5px)'
+                  e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.2)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
-                  e.currentTarget.style.boxShadow = 'none'
+                  e.currentTarget.style.transform = ''
+                  e.currentTarget.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.1)'
                 }}
-                onClick={() => handlePayment(course)}
-                disabled={!razorpayLoaded}
               >
-                {razorpayLoaded ? 'Enroll Now' : 'Loading Payment...'}
-              </button>
-            </div>
-          ))}
+                {course.price === 0 && <span style={freeLabelStyle}>Free</span>}
+                <div style={cardHeaderStyle}>
+                  <h3 style={cardTitleStyle}>{course.title}</h3>
+                  <span style={levelStyle(course.level)}>{course.level}</span>
+                </div>
+                <p style={descriptionStyle}>{course.description}</p>
+
+                <div style={priceStyle}>{course.price === 0 ? 'Free' : `₹ ${course.price}`}</div>
+
+                <div style={detailsStyle}>
+                  <div style={detailRowStyle}>
+                    <span style={detailLabelStyle}>Duration:</span>
+                    <span style={detailValueStyle}>{course.duration}</span>
+                  </div>
+                  <div style={detailRowStyle}>
+                    <span style={detailLabelStyle}>Instructor:</span>
+                    <span style={detailValueStyle}>{course.instructor}</span>
+                  </div>
+                  <div style={detailRowStyle}>
+                    <span style={detailLabelStyle}>Category:</span>
+                    <span style={detailValueStyle}>{course.category}</span>
+                  </div>
+                </div>
+
+                <button
+                  style={buttonStyle}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'
+                    e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 255, 255, 0.2)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
+                    e.currentTarget.style.boxShadow = 'none'
+                  }}
+                  onClick={() => handlePayment(course)}
+                  disabled={course.price !== 0 && !razorpayLoaded}
+                >
+                  {course.price === 0 ? 'Enroll (Free)' : razorpayLoaded ? 'Enroll Now' : 'Loading Payment...'}
+                </button>
+              </div>
+            ))
+          ) : (
+            <p style={{ color: 'rgb(18, 124, 113)', textAlign: 'center', gridColumn: '1 / -1' }}>
+              No courses found for the selected category.
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -290,5 +524,3 @@ const CoursesPage = () => {
 }
 
 export default CoursesPage
-
-// test

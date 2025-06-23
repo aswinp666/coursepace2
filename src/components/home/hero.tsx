@@ -156,6 +156,11 @@ const HomeHero: FC = () => {
                       Available Courses
                     </StyledButton>
                   </Link>
+                  <Link href="/popular-course" passHref>
+                    <StyledButton color="primary" size="large" variant="outlined" startIcon={<PlayArrowIcon />}>
+                      Video Courses
+                    </StyledButton>
+                  </Link>
                 </ScrollLink>
               </Box>
             </Box>

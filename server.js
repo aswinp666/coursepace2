@@ -57,7 +57,15 @@ app.post('/api/create-order', async (req, res) => {
     const order = await razorpay.orders.create(options)
     res.json({ order })
   } catch (err) {
-    console.error('Order creation error:', err)
+    console.error('Razorpay order creation failed:', err.message || err.error || err)
+    // Razorpay errors often have a structured `error` object
+    if (err.error) {
+      console.error('Razorpay error details:', err.error)
+      return res.status(err.statusCode || 500).json({
+        error: 'Failed to create order with Razorpay',
+        details: err.error.description || err.error.reason,
+      })
+    }
     res.status(500).json({ error: 'Failed to create order' })
   }
 })

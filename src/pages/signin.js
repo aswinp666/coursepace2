@@ -14,7 +14,7 @@ const SignIn = () => {
     setLoading(true)
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/signin`, {
+      const res = await fetch('http://localhost:5000/signin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

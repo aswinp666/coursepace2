@@ -28,7 +28,7 @@ const courseMenu: Array<Navigation> = [
 const pageMenu = headerNavigations
 
 const companyMenu: Array<Navigation> = [
-  { label: 'Contact Us', path: '#' },
+  { label: 'Contact Us', path: '/contactus' },
   { label: 'Admin Dashboard', path: '/dashboard' },
   { label: 'Term & Condition', path: '#' },
   { label: 'Take a Quiz', path: '/quizzes' },

@@ -1,6 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { FaBook, FaUserGraduate, FaClipboardList, FaVideo, FaSignOutAlt } from 'react-icons/fa'
 
 const MainDashboard = () => {
   const router = useRouter()
@@ -64,6 +65,7 @@ const MainDashboard = () => {
   const iconStyle = {
     fontSize: '3rem',
     marginBottom: '1rem',
+    color: '#fff',
   }
 
   return (
@@ -81,9 +83,12 @@ const MainDashboard = () => {
               color: '#fff',
               borderRadius: '4px',
               cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
             }}
           >
-            Logout
+            <FaSignOutAlt /> Logout
           </button>
         </div>
       </nav>
@@ -99,7 +104,7 @@ const MainDashboard = () => {
           {/* Course Management Card */}
           <Link href="/admindash" passHref>
             <div style={cardStyle}>
-              <div style={iconStyle}>📚</div>
+              <FaBook style={iconStyle} />
               <h3 style={cardTitleStyle}>Course Management</h3>
               <p>Create, edit, and manage all courses offered by the college</p>
             </div>
@@ -108,7 +113,7 @@ const MainDashboard = () => {
           {/* Enrolled Students Management Card */}
           <Link href="/studentlist" passHref>
             <div style={cardStyle}>
-              <div style={iconStyle}>👨‍🎓</div>
+              <FaUserGraduate style={iconStyle} />
               <h3 style={cardTitleStyle}>Enrolled Student Details</h3>
               <p>View and manage all student enrollments and details</p>
             </div>
@@ -117,9 +122,18 @@ const MainDashboard = () => {
           {/* Quizzes Card */}
           <Link href="/quizpanel" passHref>
             <div style={cardStyle}>
-              <div style={iconStyle}> </div>
+              <FaClipboardList style={iconStyle} />
               <h3 style={cardTitleStyle}>Quizzes Attended</h3>
               <p>View Quizzes Attended and Scores of Users/Guests</p>
+            </div>
+          </Link>
+
+          {/* Video Upload Card */}
+          <Link href="/VideoUpload" passHref>
+            <div style={cardStyle}>
+              <FaVideo style={iconStyle} />
+              <h3 style={cardTitleStyle}>Classes Upload</h3>
+              <p>Add and Delete Video Classes</p>
             </div>
           </Link>
         </div>
@@ -135,7 +149,7 @@ const MainDashboard = () => {
           marginTop: '2rem',
         }}
       >
-        <p>© {new Date().getFullYear()} College Management System</p>
+        <p>©{new Date().getFullYear()} College Management System</p>
       </footer>
     </div>
   )
