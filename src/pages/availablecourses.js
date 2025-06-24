@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios' // Still imported, but not used for initial data fetch
 
 // --- STATIC COURSE DATA ---
-// ADD 'export' KEYWORD HERE
 export const staticCoursesData = [
   {
     _id: 'c001',
@@ -148,12 +146,10 @@ const CoursesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [razorpayLoaded, setRazorpayLoaded] = useState(false)
-  // --- NEW: Wishlist state ---
+
+  // --- Wishlist state ---
   const [wishlist, setWishlist] = useState(() => {
-    // Initialize wishlist from localStorage if available
     try {
-      // Changed from 'courseWishlist' to 'wishlist' (from previous turn's fix)
       const storedWishlist = localStorage.getItem('wishlist')
       return storedWishlist ? JSON.parse(storedWishlist) : []
     } catch (e) {
@@ -175,40 +171,16 @@ const CoursesPage = () => {
     'Database Management',
   ]
 
-  // Load Razorpay script when component mounts
-  useEffect(() => {
-    const script = document.createElement('script')
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-    script.async = true
-
-    script.onload = () => {
-      setRazorpayLoaded(true)
-    }
-
-    script.onerror = () => {
-      setError('Failed to load Razorpay SDK')
-      setRazorpayLoaded(false)
-    }
-
-    document.body.appendChild(script)
-
-    return () => {
-      document.body.removeChild(script)
-    }
-  }, [])
-
-  // Use static data instead of fetching from API
+  // Use static data instead of fetching from API, and set all prices to 0
   useEffect(() => {
     // Simulate API fetch delay
     setTimeout(() => {
-      const coursesWithRandomPrices = staticCoursesData.map((course) => {
-        const isFree = Math.random() < 0.2 // 20% chance of being free
-        return {
-          ...course,
-          price: isFree ? 0 : Math.floor(Math.random() * (2000 - 500 + 1)) + 500, // Prices between 500 and 2000
-        }
-      })
-      setCourses(coursesWithRandomPrices)
+      // Set price to 0 for all courses
+      const coursesWithZeroPrices = staticCoursesData.map((course) => ({
+        ...course,
+        price: 0, // All courses are now free
+      }))
+      setCourses(coursesWithZeroPrices)
       setLoading(false)
     }, 500) // Simulate network delay
   }, [])
@@ -216,7 +188,6 @@ const CoursesPage = () => {
   // Save wishlist to localStorage whenever it changes
   useEffect(() => {
     try {
-      // Changed from 'courseWishlist' to 'wishlist' (from previous turn's fix)
       localStorage.setItem('wishlist', JSON.stringify(wishlist))
       window.dispatchEvent(new CustomEvent('wishlistUpdated'))
     } catch (e) {
@@ -233,65 +204,29 @@ const CoursesPage = () => {
     }
   }, [courses, selectedCategory])
 
-  const verifyPayment = async (paymentResponse, course) => {
+  // --- Simplified handlePayment for all free courses ---
+  const handlePayment = (course) => {
     try {
-      const res = await axios.post('http://localhost:5000/verify-payment', {
-        razorpay_payment_id: paymentResponse.razorpay_payment_id,
-        razorpay_order_id: paymentResponse.razorpay_order_id,
-        razorpay_signature: paymentResponse.razorpay_signature,
-        courseId: course._id,
-        amount: course.price * 100, // Convert to paise
-      })
-
-      return res.data.success
-    } catch (err) {
-      console.error('Verification error:', err)
-      return false
-    }
-  }
-
-  const handlePayment = async (course) => {
-    if (course.price === 0) {
-      alert('Enrollment for free course successful!')
-      return
-    }
-
-    try {
-      const { data } = await axios.post('http://localhost:5000/api/create-order', {
-        amount: course.price * 100,
-        courseId: course._id,
-      })
-
-      const options = {
-        key: 'rzp_test_mUSjI5TdDnWLE9',
-        amount: data.amount,
-        currency: 'INR',
-        order_id: data.id,
-
-        handler: async function (response) {
-          await axios.post('/api/payment/verify', {
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
-            courseId: course._id,
-          })
-
-          alert('Payment Successful & Course Enrolled!')
-        },
-        theme: {
-          color: '#3399cc',
-        },
+      const freeEnrollments = JSON.parse(localStorage.getItem('freeEnrollments')) || []
+      const newEnrollment = {
+        name: 'Guest User', // Placeholder, in a real app you'd get user info
+        dob: 'N/A', // Placeholder
+        age: 'N/A', // Placeholder
+        course: course.title,
+        enrollmentType: 'Free',
       }
-
-      const razorpay = new window.Razorpay(options)
-      razorpay.open()
-    } catch (error) {
-      console.error(error)
-      alert('Payment Failed')
+      localStorage.setItem('freeEnrollments', JSON.stringify([...freeEnrollments, newEnrollment]))
+      alert(`Successfully enrolled in "${course.title}" for FREE!`)
+      // Dispatch event to notify StudentList
+      window.dispatchEvent(new CustomEvent('freeEnrollmentAdded'))
+    } catch (e) {
+      console.error('Failed to store free enrollment:', e)
+      alert('Enrollment failed. Please try again.')
     }
   }
+  // ------------------------------------
 
-  // --- NEW: Toggle Wishlist Function ---
+  // --- Toggle Wishlist Function ---
   const handleToggleWishlist = (courseId) => {
     setWishlist((prevWishlist) => {
       if (prevWishlist.includes(courseId)) {
@@ -475,7 +410,7 @@ const CoursesPage = () => {
     marginTop: '0.5rem', // Space between buttons
   }
 
-  // --- NEW: Wishlist Button Style ---
+  // --- Wishlist Button Style ---
   const wishlistButtonStyle = (isWishlisted) => ({
     width: '100%',
     padding: '0.75rem',
@@ -537,15 +472,13 @@ const CoursesPage = () => {
                     e.currentTarget.style.boxShadow = '0 8px 32px 0 rgba(31, 38, 135, 0.1)'
                   }}
                 >
-                  {course.price === 0 && <span style={freeLabelStyle}>Free</span>}
+                  {<span style={freeLabelStyle}>Free</span>} {/* Always show Free label */}
                   <div style={cardHeaderStyle}>
                     <h3 style={cardTitleStyle}>{course.title}</h3>
                     <span style={levelStyle(course.level)}>{course.level}</span>
                   </div>
                   <p style={descriptionStyle}>{course.description}</p>
-
-                  <div style={priceStyle}>{course.price === 0 ? 'Free' : `₹ ${course.price}`}</div>
-
+                  <div style={priceStyle}>Free</div> {/* Always display Free */}
                   <div style={detailsStyle}>
                     <div style={detailRowStyle}>
                       <span style={detailLabelStyle}>Duration:</span>
@@ -560,7 +493,6 @@ const CoursesPage = () => {
                       <span style={detailValueStyle}>{course.category}</span>
                     </div>
                   </div>
-
                   {/* Buttons at the bottom */}
                   <div>
                     <button
@@ -574,12 +506,11 @@ const CoursesPage = () => {
                         e.currentTarget.style.boxShadow = 'none'
                       }}
                       onClick={() => handlePayment(course)}
-                      disabled={course.price !== 0 && !razorpayLoaded}
                     >
-                      {course.price === 0 ? 'Enroll (Free)' : razorpayLoaded ? 'Enroll Now' : 'Loading Payment...'}
+                      Enroll (Free) {/* Always show Enroll (Free) */}
                     </button>
 
-                    {/* --- NEW: Wishlist Button Rendered Here --- */}
+                    {/* --- Wishlist Button Rendered Here --- */}
                     <button
                       style={wishlistButtonStyle(isWishlisted)}
                       onMouseEnter={(e) => {
