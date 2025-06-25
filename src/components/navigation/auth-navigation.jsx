@@ -1,36 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import WishlistModal from '../wishlist/wishlist-modal' // Import the modal
+// Removed WishlistModal import
 
 // Import the staticCoursesData from availablecourses.js
 // Ensure the path is correct based on your project structure.
-import { staticCoursesData as allAvailableCourses } from '../../pages/availablecourses' //
+// import { staticCoursesData as allAvailableCourses } from '../../pages/availablecourses'; // This import is no longer needed here
 
 const AuthNavigation = () => {
   const [user, setUser] = useState(null)
-  const [showWishlistModal, setShowWishlistModal] = useState(false)
-  const [wishlistItems, setWishlistItems] = useState([])
   const router = useRouter()
 
-  const loadWishlistItems = () => {
-    if (typeof window !== 'undefined') {
-      const storedWishlistIds = JSON.parse(localStorage.getItem('wishlist') || '[]') //
-
-      // Filter from the correct course data and use the _id property
-      const items = allAvailableCourses.filter((course) => storedWishlistIds.includes(course._id.toString())) //
-      setWishlistItems(items) //
-    }
-  }
-
-  // Function to open wishlist modal
-  const handleOpenWishlistModal = () => {
-    loadWishlistItems() //
-    setShowWishlistModal(true) //
-  }
-
-  const handleCloseWishlistModal = () => {
-    setShowWishlistModal(false) //
-  }
+  // Removed showWishlistModal, setShowWishlistModal, wishlistItems, setWishlistItems states
+  // Removed loadWishlistItems, handleOpenWishlistModal, handleCloseWishlistModal functions
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -51,20 +32,8 @@ const AuthNavigation = () => {
 
     fetchUser()
 
-    // Listener for wishlist updates
-    const handleWishlistUpdate = () => {
-      if (showWishlistModal) {
-        // Only reload if modal is currently open
-        loadWishlistItems() //
-      }
-    }
-
-    window.addEventListener('wishlistUpdated', handleWishlistUpdate) //
-
-    return () => {
-      window.removeEventListener('wishlistUpdated', handleWishlistUpdate) //
-    }
-  }, [showWishlistModal]) // Add showWishlistModal to dependencies to re-evaluate listener if modal state changes
+    // Removed wishlistUpdated event listener logic from here
+  }, []) // Removed showWishlistModal from dependencies
 
   const handleLogout = async () => {
     await fetch('http://localhost:5000/logout', {
@@ -80,12 +49,12 @@ const AuthNavigation = () => {
     <nav>
       {user ? (
         <>
-          {/* Wishlist Modal Component */}
-          <WishlistModal open={showWishlistModal} onClose={handleCloseWishlistModal} courses={wishlistItems} />
+          {/* Wishlist Modal Component Removed */}
+          {/* <WishlistModal open={showWishlistModal} onClose={handleCloseWishlistModal} courses={wishlistItems} /> */}
 
           <span>Welcome, {user.email}</span>
           <button
-            onClick={handleOpenWishlistModal} //
+            onClick={() => router.push('/wishlist')} // Navigate to /wishlist
             style={{
               backgroundColor: '#55CDBA', // A different color for distinction
               color: 'white',
