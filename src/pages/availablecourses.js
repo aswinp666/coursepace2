@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/router' // Import useRouter
 
 // --- STATIC COURSE DATA ---
 export const staticCoursesData = [
@@ -146,6 +147,7 @@ const CoursesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const router = useRouter() // Get router instance
 
   // --- Wishlist state ---
   const [wishlist, setWishlist] = useState(() => {
@@ -216,9 +218,11 @@ const CoursesPage = () => {
         enrollmentType: 'Free',
       }
       localStorage.setItem('freeEnrollments', JSON.stringify([...freeEnrollments, newEnrollment]))
-      alert(`Successfully enrolled in "${course.title}" for FREE!`)
-      // Dispatch event to notify StudentList
+      // alert(`Successfully enrolled in "${course.title}" for FREE!`) // Old alert
+      // Dispatch event to notify StudentList - still useful if other parts of the app listen to this
       window.dispatchEvent(new CustomEvent('freeEnrollmentAdded'))
+      // Redirect to the course basics page
+      router.push('/course-basics')
     } catch (e) {
       console.error('Failed to store free enrollment:', e)
       alert('Enrollment failed. Please try again.')
