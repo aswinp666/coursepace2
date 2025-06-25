@@ -24,8 +24,8 @@ export const navigations: Navigation[] = [
     label: 'Mentor',
     path: 'mentors', // '/mentors',
   },
-  {
-    label: 'Wishlist', // New entry for wishlist
-    path: '#wishlist-modal', // Special path to trigger modal, not a route
-  },
+  // {
+  //   label: 'Wishlist', // New entry for wishlist
+  //   path: 'wishlist', // Special path to trigger modal, not a route
+  // },
 ]
