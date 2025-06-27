@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import styles from './CourseBasicsPage.module.css' // Import CSS Modules
+import styles from './CourseBasicsPage.module.css'
+import { jsPDF } from 'jspdf' // Import jsPDF
 
 const CourseBasicsPage = () => {
   const [currentLevel, setCurrentLevel] = useState(1)
-  const totalLevels = 5 // Changed totalLevels to 5 for demonstration purposes
+  const totalLevels = 5
 
   const handleNextLevel = () => {
     if (currentLevel < totalLevels) {
@@ -18,7 +19,26 @@ const CourseBasicsPage = () => {
   }
 
   const handleDownloadCertificate = () => {
-    alert('Certificate download functionality will be implemented later.')
+    const doc = new jsPDF()
+
+    // Basic Certificate Content
+    doc.setFontSize(22)
+    doc.text('Certificate of Completion', 20, 30)
+
+    doc.setFontSize(14)
+    doc.text('This certifies that', 20, 50)
+
+    doc.setFontSize(20)
+    doc.text('John Doe', 20, 65) // Replace with actual user name
+
+    doc.setFontSize(14)
+    doc.text('has successfully completed the', 20, 80)
+    doc.text('React Basics Course', 20, 90)
+
+    doc.setFontSize(12)
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 110)
+
+    doc.save('React_Basics_Certificate.pdf')
   }
 
   const renderLevelContent = () => {
@@ -109,7 +129,7 @@ export default WelcomeMessage;`}
             >
               <iframe
                 style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                src="https://www.youtube.com/embed/D2MqT4OEgoE?si=kEfxg0lVGw8TDYf3" // Example YouTube embed for React State & Props
+                src="https://www.youtube.com/embed/O6P86uwfdR0" // Example YouTube embed for React State & Props
                 title="React State and Props Explained"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -198,7 +218,7 @@ export default UserList;`}
             >
               <iframe
                 style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                src="https://www.youtube.com/embed/D2MqT4OEgoE?si=kEfxg0lVGw8TDYf3" // Example YouTube embed for React List Rendering
+                src="https://www.youtube.com/embed/b0b5J3h5u9k" // Example YouTube embed for React List Rendering
                 title="React List Rendering Tutorial"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -218,11 +238,14 @@ export default UserList;`}
   if (currentLevel > totalLevels) {
     return (
       <div className={`${styles['course-basics-page']} ${styles.completed}`}>
-        <h1>Course Completed Successfully!</h1>
-        <p>Congratulations on completing the course basics.</p>
+        <h1 className={styles['completion-heading']}> Course Completed Successfully!</h1>
+        <p className={styles['completion-message']}>
+          Congratulations on mastering the React Basics. You're now ready for more advanced topics!
+        </p>
         <button onClick={handleDownloadCertificate} className={styles['download-certificate-btn']}>
-          Download Certificate
+          Download Your Certificate
         </button>
+        <p className={styles['congratulations']}>Well done, future React developer!</p>
       </div>
     )
   }
